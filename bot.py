@@ -4,7 +4,10 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
 
+# Беремо токен з Environment Variables Render
 TOKEN = os.getenv("BOT_TOKEN")
+if not TOKEN:
+    raise ValueError("Не знайдено BOT_TOKEN! Додай змінну середовища на Render.")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -15,6 +18,7 @@ main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(text="👷 Працівники")],
         [KeyboardButton(text="🏗 Об'єкти")],
         [KeyboardButton(text="💰 Витрати")],
+        [KeyboardButton(text="🛑 Стоп")],  # Кнопка Стоп
     ],
     resize_keyboard=True
 )
@@ -49,7 +53,14 @@ async def add_worker(message: Message):
 async def list_workers(message: Message):
     await message.answer("Список працівників скоро буде 📋")
 
+@dp.message(F.text == "🛑 Стоп")
+async def stop_bot(message: Message):
+    await message.answer("Бот зупиняється... 🛑")
+    await bot.session.close()
+    # На Render бот не зупиниться повністю, але закриє сесію бота
+
 async def main():
+    print("Бот запущено...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
